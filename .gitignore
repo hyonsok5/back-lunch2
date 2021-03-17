@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+.python_packages
+
+.vscode
+.funcignore
+
+host.json
+local.settings.json 
+proxies.json 
