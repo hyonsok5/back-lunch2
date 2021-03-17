@@ -5,10 +5,10 @@ import azure.functions as func
 import json
 import psycopg2
 
-DB_NAME = process.env["DB_NAME"]
-DB_USER = process.env["DB_USER"]
-DB_URL = process.env["DB_URL"]
-DB_PASSWORD = process.env["DB_PASSWORD"]
+DB_NAME = process.env["DB-NAME"]
+DB_USER = process.env["DB-USER"]
+DB_URL = process.env["DB-URL"]
+DB_PASSWORD = process.env["DB-PASSWORD"]
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     #logging.info('Python HTTP trigger function processed a request.')
