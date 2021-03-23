@@ -15,7 +15,7 @@ DB_URL = os.environ["DB_URL"]
 DB_PASSWORD = os.environ["DB_PASSWORD"]
 
 
-def main(req: func.HttpRequest) -> func.HttpResponse:
+def main(req: func.HttpRequest, doc: func.Out) -> func.HttpResponse:
     #logging.info('Python HTTP trigger function processed a request.')
 
     conn = psycopg2.connect(dbname=DB_NAME,
@@ -68,6 +68,17 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                                 values
                                 (%s,%s,%s,%s,now(),%s,%s)   
                                 """,[str(id),name,date,menu,projectid,str(division)])
+        newdocs = func.DocumentList() 
+        newproduct_dict = {
+            "id": str(id),
+            "menu": menu, 
+            "date": date,
+            "name": name,
+            "projectid": projectid,
+            "division": str(division)
+        }
+        newdocs.append(func.Document.from_dict(newproduct_dict))
+        doc.set(newdocs)
     
     cur.close()
             
