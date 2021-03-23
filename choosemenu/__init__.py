@@ -15,7 +15,7 @@ DB_URL = os.environ["DB_URL"]
 DB_PASSWORD = os.environ["DB_PASSWORD"]
 
 
-def main(req: func.HttpRequest, doc: func.Out) -> func.HttpResponse:
+def main(req: func.HttpRequest, doc) -> func.HttpResponse:
     #logging.info('Python HTTP trigger function processed a request.')
 
     conn = psycopg2.connect(dbname=DB_NAME,
