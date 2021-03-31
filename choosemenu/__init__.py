@@ -8,11 +8,13 @@ import psycopg2
 import uuid
 import os
 
+import requests
 
 DB_NAME = os.environ["DB_NAME"]
 DB_USER = os.environ["DB_USER"]
 DB_URL = os.environ["DB_URL"]
 DB_PASSWORD = os.environ["DB_PASSWORD"]
+
 
 
 def main(req: func.HttpRequest, doc) -> func.HttpResponse:
@@ -62,23 +64,37 @@ def main(req: func.HttpRequest, doc) -> func.HttpResponse:
                                 set menu = %s,
                                     updated = now() 
                                 where id = %s """,[menu,str(record[2])])  
+                newproduct_ela = {
+                    "menu": menu, 
+                    "date": date,
+                    "name": name,
+                    "projectid": projectid,
+                    "division": str(division)
+                }
+                newproduct_cos = newproduct_ela.copy()
+                id = str(id)
+                newproduct_cos["id"] = id
+                insert_cosmosDB(doc, newproduct_cos)
+                insert_elasticsearch(doc, newproduct_ela, id)
     else:
         cur.execute(""" insert into menu_selected
                                 (id,name,date,menu,created, projectid,division)
                                 values
                                 (%s,%s,%s,%s,now(),%s,%s)   
                                 """,[str(id),name,date,menu,projectid,str(division)])
-        newdocs = func.DocumentList() 
-        newproduct_dict = {
-            "id": str(id),
+        
+        newproduct_ela = {
             "menu": menu, 
             "date": date,
             "name": name,
             "projectid": projectid,
             "division": str(division)
         }
-        newdocs.append(func.Document.from_dict(newproduct_dict))
-        doc.set(newdocs)
+        newproduct_cos = newproduct_ela.copy()
+        id = str(id)
+        newproduct_cos["id"] = id
+        insert_cosmosDB(doc, newproduct_cos)
+        insert_elasticsearch(doc, newproduct_ela, id)
     
     cur.close()
             
@@ -86,3 +102,19 @@ def main(req: func.HttpRequest, doc) -> func.HttpResponse:
      
     func.HttpResponse.mimetype = 'application/json'
     return func.HttpResponse(data)
+
+
+def insert_elasticsearch(doc, json, id):
+    host = 'lunch2.koreacentral.cloudapp.azure.com'
+    index = 'lunch2-index'
+    type = '_doc'
+    url = host + '/' + index + '/' + type + '/'
+
+    headers = { "Content-Type": "application/json" }
+    r = requests.post(url + id, json=json, headers=headers)
+
+def insert_cosmosDB(doc, dict):
+    newdocs = func.DocumentList() 
+    
+    newdocs.append(func.Document.from_dict(dict))
+    doc.set(newdocs)
